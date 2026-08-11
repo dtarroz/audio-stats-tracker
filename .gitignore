@@ -1,0 +1,32 @@
+# Fichiers et dossiers à ignorer
+
+# Base de données
+database/*.sqlite
+database/*.db
+
+# Logs
+logs/*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs et IDEs
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+*~
+
+# Fichiers de configuration locaux (optionnel)
+# config/config.local.php
+
+# Cache
+*.cache
+
+# Fichiers temporaires
+tmp/
+temp/
+*.tmp

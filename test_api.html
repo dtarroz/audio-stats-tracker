@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Sync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test API Synchronisation</h1>
+    <p>Collez le contenu HTML de la page audio.com ci-dessous et cliquez sur "Envoyer".</p>
+    
+    <textarea id="htmlContent" placeholder="Collez le HTML ici..."></textarea>
+    
+    <button onclick="sendSync()">Envoyer</button>
+    
+    <div id="result" class="result"></div>
+    
+    <h2>Exemple d'utilisation (JavaScript)</h2>
+    <pre><code>// Envoyer via fetch
+fetch('https://crash8.fr/audio/actions/api_sync.php', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        html: htmlContent
+    })
+})
+.then(response => response.json())
+.then(data => {
+    console.log('Succès:', data);
+})
+.catch(error => {
+    console.error('Erreur:', error);
+});
+
+// Ou via FormData
+const formData = new FormData();
+formData.append('html', htmlContent);
+
+fetch('https://crash8.fr/audio/actions/api_sync.php', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data));</code></pre>
+    
+    <h2>Exemple d'utilisation (cURL)</h2>
+    <pre><code>curl -X POST https://crash8.fr/audio/actions/api_sync.php \
+  -H "Content-Type: application/json" \
+  -d '{"html":"&lt;html&gt;...&lt;/html&gt;"}'</code></pre>
+    
+    <script>
+        function sendSync() {
+            var htmlContent = document.getElementById('htmlContent').value;
+            var resultDiv = document.getElementById('result');
+            
+            if (!htmlContent.trim()) {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<strong>Erreur:</strong> Veuillez coller du contenu HTML.';
+                return;
+            }
+            
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>Envoi en cours...</strong>';
+            
+            // Envoyer la requête
+            fetch('actions/api_sync.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    html: htmlContent
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    var html = '<strong>✅ ' + data.message + '</strong><br><br>';
+                    html += '<strong>Statistiques:</strong><br>';
+                    html += '• Pistes trouvées: ' + data.stats.tracks_found + '<br>';
+                    html += '• Pistes ajoutées: ' + data.stats.tracks_added + '<br>';
+                    html += '• Pistes mises à jour: ' + data.stats.tracks_updated + '<br>';
+                    
+                    if (data.stats.errors > 0) {
+                        html += '<br><strong>⚠️ Erreurs (' + data.stats.errors + '):</strong><br>';
+                        data.errors.forEach(function(error) {
+                            html += '• ' + error + '<br>';
+                        });
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<strong>❌ Erreur:</strong> ' + data.error;
+                }
+            })
+            .catch(function(error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>❌ Erreur réseau:</strong> ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>
