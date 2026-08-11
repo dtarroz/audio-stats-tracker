@@ -1,6 +1,6 @@
 # Audio Stats Tracker
 
-Application web PHP pour suivre l'évolution du nombre d'écoutes des musiques sur Audio.com.
+Application web PHP pour suivre l'évolution du nombre d'écoutes de ces musiques sur Audio.com.
 
 ## 🎯 Fonctionnalités
 
@@ -17,7 +17,7 @@ Application web PHP pour suivre l'évolution du nombre d'écoutes des musiques s
 
 ## 📋 Prérequis
 
-- **PHP 5.4.45 ou supérieur** (testé sur PHP 5.4.45, 7.4, 8.x)
+- **PHP 5.4.45 ou supérieur** (testé sur PHP 5.4.45)
 - Extensions PHP requises :
   - PDO
   - PDO_SQLITE
@@ -223,12 +223,10 @@ Utilisez l'un des moyens ci-dessus (API, bookmarklet) pour effectuer votre premi
 
 - **Recherche** : Saisissez un mot-clé dans la barre de recherche
 - **Tri disponible** :
-  - Ordre Audio.com (récent en premier) - **par défaut**
+  - Ordre Audio.com (récent en premier)
   - Titre A → Z / Z → A
   - Nombre d'écoutes (décroissant)
-  - Progression (décroissant)
-
-**Note Firefox** : La valeur par défaut est forcée au chargement pour éviter que Firefox ne garde l'ancien tri en cache.
+  - Progression (décroissant) - **par défaut**
 
 ### Top 5 et progressions
 
@@ -333,100 +331,9 @@ Les fichiers CSS et JS utilisent un système de versioning pour éviter les prob
    ```
 3. Les navigateurs téléchargeront automatiquement la nouvelle version
 
-## 🛡️ Sécurité
-
-L'application inclut :
-
-- Protection via `.htaccess` des dossiers sensibles
-- Prévention des injections SQL (requêtes préparées PDO)
-- Échappement HTML
-- Logs des erreurs
-- Pas d'affichage d'erreurs en production
-
-## 📝 Compatibilité
-
-- **PHP** : 5.4.45, 5.5, 5.6, 7.x, 8.x (testé principalement sur 5.4.45 et 8.x)
-- **Navigateurs** : Chrome, Firefox, Safari, Edge (avec gestion spécifique du cache Firefox)
-- **Mobile** : iOS Safari, Chrome Mobile, Firefox Mobile
-- **Hébergement** : Mutualisé, VPS, dédié (testé sur hébergement mutualisé cPanel)
-- **Serveur web** : Apache (avec .htaccess), Nginx (configuration manuelle nécessaire)
-
-### Notes de compatibilité PHP
-
-- **PHP 5.4.45** : Syntaxe `array()` utilisée (pas de `[]`)
-- **PHP 7+** : Compatible, recommandé pour les performances
-- **Extensions requises** : Toutes disponibles par défaut sur la plupart des hébergements
-
-## 🐛 Résolution de problèmes
-
-### L'API de synchronisation ne fonctionne pas
-
-1. Vérifiez que `/actions/api_sync.php` est accessible
-2. Consultez `/logs/application.log` pour voir les erreurs
-3. Vérifiez que le HTML envoyé contient bien des éléments `data-test-audio-id`
-4. Testez avec la page de test : `/test_api.html`
-
-### Aucune piste n'apparaît dans le Top progressions
-
-C'est normal si :
-- Aucune piste n'a de progression positive sur la période
-- Il n'y a pas assez d'historique (besoin d'au moins 2 enregistrements)
-- Les premières valeurs sont à 0
-
-### Les graphiques ne s'affichent pas
-
-1. Vérifiez que Chart.js est chargé (connexion internet requise pour le CDN)
-2. Ouvrez la console du navigateur (F12) pour voir les erreurs JavaScript
-3. Vérifiez qu'il y a bien des données historiques pour la musique
-
-### Les pistes apparaissent en double
-
-Ce problème a été corrigé. Si vous le rencontrez encore :
-1. Vérifiez que vous utilisez la dernière version
-2. Consultez les logs pour voir si des erreurs PHP apparaissent
-3. Le système détecte automatiquement les doublons via `audio_id`
-
-### Les valeurs de progression sont incorrectes
-
-Le calcul a été corrigé pour utiliser les valeurs chronologiques :
-- **Première valeur** : Premier enregistrement de la période (ORDER BY date ASC)
-- **Dernière valeur** : Dernier enregistrement (ORDER BY date DESC)
-- Avant, MIN/MAX étaient utilisés, ce qui donnait des résultats incorrects
-
-### Firefox garde l'ancien tri après rechargement
-
-Ce problème a été corrigé : la valeur par défaut est forcée au chargement via JavaScript.
-
-### Les assets CSS/JS ne se mettent pas à jour
-
-Le système de versioning a été ajouté. Incrémentez `APP_VERSION` dans `config/config.php` après chaque modification.
-
-### Erreur de base de données
-
-1. Vérifiez que le dossier `/database/` est accessible en écriture
-2. Supprimez `/database/database.sqlite` pour recréer la base
-3. Consultez les logs
-
-### Les images ne s'affichent pas
-
-Les images sont chargées depuis Audio.com. Si elles ne s'affichent pas :
-1. Vérifiez votre connexion internet
-2. Vérifiez que les URLs d'images sont correctes dans la base
-
 ## 📄 Licence
 
 Ce projet est libre d'utilisation pour un usage personnel ou commercial.
-
-## 👨‍💻 Développement
-
-Pour ajouter des fonctionnalités :
-
-1. Respectez l'architecture MVC légère
-2. Ajoutez les classes dans `/classes/`
-3. Créez les actions dans `/actions/`
-4. Mettez à jour les vues dans `/views/`
-5. Commentez abondamment votre code
-6. Testez la compatibilité PHP 5.4+ (idéalement avec PHP 7.4+)
 
 ## 📞 Support
 
@@ -496,8 +403,3 @@ Pour aller plus loin, consultez :
   - Patterns de code et optimisations
   - Corrections de bugs importantes
   - Meilleures pratiques apprises
-
----
-
-**Version** : 1.0.1  
-**Date** : Août 2026
