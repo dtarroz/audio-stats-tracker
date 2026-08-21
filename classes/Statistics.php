@@ -88,17 +88,8 @@ class Statistics {
         $firstValue = (int)$firstResult['listen_count'];
         $currentValue = (int)$currentResult['listen_count'];
         
-        // Calcul de la progression
-        if ($firstValue == 0) {
-            // Si la première valeur est 0, calculer comme une croissance absolue
-            if ($currentValue > 0) {
-                $progression = null; // N/A car division par zéro impossible
-            } else {
-                $progression = 0;
-            }
-        } else {
-            $progression = (($currentValue - $firstValue) / $firstValue) * 100;
-        }
+        // Calcul de la progression (nombre d'écoutes)
+        $progression = $currentValue - $firstValue;
         
         return array(
             'first_value' => $firstValue,
@@ -123,10 +114,7 @@ class Statistics {
                 t.image_url AS image_url,
                 first_values.first_value AS first_value,
                 current_values.current_value AS current_value,
-                CASE 
-                    WHEN first_values.first_value = 0 THEN NULL
-                    ELSE ((current_values.current_value - first_values.first_value) * 100.0 / first_values.first_value)
-                END as progression
+                (current_values.current_value - first_values.first_value) as progression
             FROM tracks t
             INNER JOIN (
                 SELECT 
@@ -152,8 +140,6 @@ class Statistics {
                 ) last_dates ON th2.track_id = last_dates.track_id AND th2.captured_at = last_dates.max_date
             ) current_values ON current_values.track_id = t.id
             WHERE t.available = 1
-            AND first_values.first_value > 0
-            AND current_values.current_value > first_values.first_value
             ORDER BY progression DESC
             LIMIT ?
         ";

@@ -147,9 +147,7 @@ function loadTopProgressions(days) {
                     
                     for (var i = 0; i < data.progressions.length; i++) {
                         var item = data.progressions[i];
-                        var progression = parseFloat(item.progression) || 0;
-                        var progressionClass = progression >= 0 ? '' : 'negative';
-                        var progressionSign = progression >= 0 ? '+' : '';
+                        var progression = parseInt(item.progression) || 0;
                         
                         html += '<div class="progression-item">';
                         html += '<div class="progression-rank">' + (i + 1) + '</div>';
@@ -160,8 +158,8 @@ function loadTopProgressions(days) {
                         
                         html += '<div class="progression-info">';
                         html += '<div class="progression-title">' + escapeHtml(item.title) + '</div>';
-                        html += '<div class="progression-value ' + progressionClass + '">';
-                        html += progressionSign + progression.toFixed(2) + ' %';
+                        html += '<div class="progression-value">';
+                        html += '+' + progression;
                         html += '</div>';
                         html += '</div>';
                         html += '</div>';
@@ -312,10 +310,11 @@ function displayTracks(tracks) {
         // Progression
         var progressionSpan = clone.querySelector('.track-progression');
         if (track.progression !== null && track.progression !== undefined) {
-            var progressionClass = track.progression >= 0 ? 'positive' : 'negative';
-            var progressionSign = track.progression >= 0 ? '+' : '';
-            progressionSpan.textContent = progressionSign + track.progression.toFixed(2) + ' %';
-            progressionSpan.classList.add(progressionClass);
+            var progression = parseInt(track.progression);
+            progressionSpan.textContent = '+' + progression;
+            if (progression > 0) {
+                progressionSpan.classList.add('positive');
+            }
         } else {
             progressionSpan.textContent = 'N/A';
         }

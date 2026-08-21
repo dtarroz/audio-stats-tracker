@@ -350,6 +350,16 @@ En cas de problème :
 
 ## 📋 Changelog
 
+### Version 1.1.0 (Août 2026)
+
+**Améliorations** :
+- ✅ Affichage de la progression en nombre d'écoutes au lieu du pourcentage
+  - Exemple : "+10" au lieu de "+12.5%"
+  - Plus intuitif et direct à comprendre
+  - Affiche "+0" pour les musiques sans nouvelles écoutes
+- ✅ Tri des progressions amélioré
+  - Inclut désormais toutes les musiques (même celles avec 0)
+
 ### Version 1.0.1 (Août 2026)
 
 **Nouvelles fonctionnalités** :
