@@ -5,9 +5,10 @@
 
 // État de l'application
 var app = {
-    currentPeriod: 30,
+    currentPeriod: 15,
     currentSort: 'progression',
     currentSearch: '',
+    filterTodayListens: false,
     tracks: [],
     charts: {}
 };
@@ -17,10 +18,9 @@ var app = {
  */
 document.addEventListener('DOMContentLoaded', function() {
     initSyncButton();
-    initTopProgressionsTabs();
     initFilters();
     loadTracks();
-    loadTopProgressions(30);
+    loadTopProgressions(15);
 });
 
 /**
@@ -101,30 +101,6 @@ function startSync() {
 }
 
 /**
- * Initialise les onglets des top progressions
- */
-function initTopProgressionsTabs() {
-    var tabs = document.querySelectorAll('.tab-btn');
-    
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].addEventListener('click', function() {
-            // Retirer la classe active de tous les onglets
-            var allTabs = document.querySelectorAll('.tab-btn');
-            for (var j = 0; j < allTabs.length; j++) {
-                allTabs[j].classList.remove('active');
-            }
-            
-            // Ajouter la classe active à l'onglet cliqué
-            this.classList.add('active');
-            
-            // Charger les progressions
-            var days = parseInt(this.getAttribute('data-days'));
-            loadTopProgressions(days);
-        });
-    }
-}
-
-/**
  * Charge le top des progressions
  */
 function loadTopProgressions(days) {
@@ -193,10 +169,17 @@ function loadTopProgressions(days) {
 function initFilters() {
     var searchInput = document.getElementById('searchInput');
     var sortSelect = document.getElementById('sortSelect');
+    var filterTodayCheckbox = document.getElementById('filterTodayListens');
     
     // Forcer la valeur par défaut (fix Firefox qui garde la valeur au reload)
     if (sortSelect) {
         sortSelect.value = app.currentSort;
+    }
+    
+    // Forcer la checkbox à décochée au chargement (fix Firefox)
+    if (filterTodayCheckbox) {
+        filterTodayCheckbox.checked = false;
+        app.filterTodayListens = false;
     }
     
     if (searchInput) {
@@ -217,6 +200,13 @@ function initFilters() {
             loadTracks();
         });
     }
+    
+    if (filterTodayCheckbox) {
+        filterTodayCheckbox.addEventListener('change', function() {
+            app.filterTodayListens = this.checked;
+            loadTracks();
+        });
+    }
 }
 
 /**
@@ -231,6 +221,8 @@ function loadTracks() {
     var url = 'actions/search.php?';
     url += 'search=' + encodeURIComponent(app.currentSearch);
     url += '&orderBy=' + encodeURIComponent(app.currentSort);
+    url += '&filterTodayListens=' + (app.filterTodayListens ? '1' : '0');
+    url += '&days=' + app.currentPeriod;
     
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);

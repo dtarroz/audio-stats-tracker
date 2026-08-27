@@ -48,34 +48,57 @@ class Statistics {
     /**
      * Calcule la progression d'une musique sur une période
      * @param int $trackId ID de la musique
-     * @param int $days Nombre de jours
+     * @param int $days Nombre de jours (0 = tout l'historique)
      * @return array Tableau avec first_value, current_value, progression
      */
     public function calculateProgression($trackId, $days) {
-        // Récupérer la première valeur chronologique sur la période
-        $dateLimit = date('Y-m-d', strtotime("-{$days} days"));
-        
-        $queryFirst = "
-            SELECT listen_count
-            FROM track_history
-            WHERE track_id = ?
-            AND DATE(captured_at) >= ?
-            ORDER BY captured_at ASC
-            LIMIT 1
-        ";
-        
-        $firstResult = $this->db->queryOne($queryFirst, array($trackId, $dateLimit));
-        
-        // Récupérer la dernière valeur chronologique
-        $queryCurrent = "
-            SELECT listen_count
-            FROM track_history
-            WHERE track_id = ?
-            ORDER BY captured_at DESC
-            LIMIT 1
-        ";
-        
-        $currentResult = $this->db->queryOne($queryCurrent, array($trackId));
+        if ($days == 0) {
+            // Tout l'historique : prendre la première et dernière valeur
+            $queryFirst = "
+                SELECT listen_count
+                FROM track_history
+                WHERE track_id = ?
+                ORDER BY captured_at ASC
+                LIMIT 1
+            ";
+            $firstResult = $this->db->queryOne($queryFirst, array($trackId));
+            
+            $queryCurrent = "
+                SELECT listen_count
+                FROM track_history
+                WHERE track_id = ?
+                ORDER BY captured_at DESC
+                LIMIT 1
+            ";
+            $currentResult = $this->db->queryOne($queryCurrent, array($trackId));
+        } else {
+            // Période spécifique : utiliser la même logique que getHistory
+            // Récupérer les N derniers jours de sync (valeur max par jour)
+            $query = "
+                SELECT 
+                    MAX(listen_count) as listen_count
+                FROM track_history
+                WHERE track_id = ?
+                GROUP BY DATE(captured_at)
+                ORDER BY DATE(captured_at) DESC
+                LIMIT ?
+            ";
+            
+            $results = $this->db->query($query, array($trackId, $days));
+            
+            if (empty($results)) {
+                return array(
+                    'first_value' => 0,
+                    'current_value' => 0,
+                    'progression' => null
+                );
+            }
+            
+            // La première valeur est la plus récente (index 0)
+            // La dernière valeur est la plus ancienne (index count-1)
+            $currentResult = array('listen_count' => $results[0]['listen_count']);
+            $firstResult = array('listen_count' => $results[count($results) - 1]['listen_count']);
+        }
         
         if (!$firstResult || !$currentResult) {
             return array(
@@ -105,46 +128,35 @@ class Statistics {
      * @return array
      */
     public function getTopProgressions($days, $limit = 10) {
-        $dateLimit = date('Y-m-d', strtotime("-{$days} days"));
+        // Récupérer toutes les tracks disponibles
+        $tracksQuery = "SELECT id, title, image_url FROM tracks WHERE available = 1";
+        $tracks = $this->db->query($tracksQuery);
         
-        $query = "
-            SELECT 
-                t.id AS id,
-                t.title AS title,
-                t.image_url AS image_url,
-                first_values.first_value AS first_value,
-                current_values.current_value AS current_value,
-                (current_values.current_value - first_values.first_value) as progression
-            FROM tracks t
-            INNER JOIN (
-                SELECT 
-                    th1.track_id,
-                    th1.listen_count as first_value
-                FROM track_history th1
-                INNER JOIN (
-                    SELECT track_id, MIN(captured_at) as min_date
-                    FROM track_history
-                    WHERE DATE(captured_at) >= ?
-                    GROUP BY track_id
-                ) first_dates ON th1.track_id = first_dates.track_id AND th1.captured_at = first_dates.min_date
-            ) first_values ON first_values.track_id = t.id
-            INNER JOIN (
-                SELECT 
-                    th2.track_id,
-                    th2.listen_count as current_value
-                FROM track_history th2
-                INNER JOIN (
-                    SELECT track_id, MAX(captured_at) as max_date
-                    FROM track_history
-                    GROUP BY track_id
-                ) last_dates ON th2.track_id = last_dates.track_id AND th2.captured_at = last_dates.max_date
-            ) current_values ON current_values.track_id = t.id
-            WHERE t.available = 1
-            ORDER BY progression DESC
-            LIMIT ?
-        ";
+        $progressions = array();
         
-        return $this->db->query($query, array($dateLimit, $limit));
+        foreach ($tracks as $track) {
+            // Calculer la progression pour chaque track
+            $progression = $this->calculateProgression($track['id'], $days);
+            
+            if ($progression['progression'] !== null && $progression['progression'] > 0) {
+                $progressions[] = array(
+                    'id' => $track['id'],
+                    'title' => $track['title'],
+                    'image_url' => $track['image_url'],
+                    'first_value' => $progression['first_value'],
+                    'current_value' => $progression['current_value'],
+                    'progression' => $progression['progression']
+                );
+            }
+        }
+        
+        // Trier par progression décroissante
+        usort($progressions, function($a, $b) {
+            return $b['progression'] - $a['progression'];
+        });
+        
+        // Retourner seulement les N premiers
+        return array_slice($progressions, 0, $limit);
     }
     
     /**
@@ -155,11 +167,51 @@ class Statistics {
         return array(
             'total_tracks' => $this->trackRepository->countAll(),
             'available_tracks' => $this->trackRepository->countAvailable(),
-            'deleted_tracks' => $this->trackRepository->countDeleted(),
+            'today_listens' => $this->getTodayListens(),
             'total_listen_count' => $this->trackRepository->getTotalListenCount(),
             'last_sync' => $this->getLastSyncDate(),
             'most_listened' => $this->trackRepository->getMostListened(),
             'top_listened' => $this->trackRepository->getTopListened(5)
         );
+    }
+    
+    /**
+     * Calcule le nombre total d'écoutes sur la dernière journée
+     * @return int
+     */
+    public function getTodayListens() {
+        // Comparer la dernière journée de sync avec la journée précédente
+        $query = "
+            SELECT 
+                SUM(COALESCE(today.listen_count, 0) - COALESCE(yesterday.listen_count, 0)) as today_listens
+            FROM tracks t
+            LEFT JOIN (
+                SELECT track_id, listen_count
+                FROM track_history
+                WHERE DATE(captured_at) = (
+                    SELECT DATE(MAX(captured_at)) FROM track_history
+                )
+                GROUP BY track_id
+                HAVING captured_at = MAX(captured_at)
+            ) today ON t.id = today.track_id
+            LEFT JOIN (
+                SELECT track_id, listen_count
+                FROM track_history
+                WHERE DATE(captured_at) = (
+                    SELECT DATE(MAX(captured_at), '-1 day') FROM track_history
+                )
+                GROUP BY track_id
+                HAVING captured_at = MAX(captured_at)
+            ) yesterday ON t.id = yesterday.track_id
+            WHERE today.listen_count > COALESCE(yesterday.listen_count, 0)
+        ";
+        
+        $result = $this->db->queryOne($query);
+        
+        if ($result && $result['today_listens']) {
+            return max(0, (int)$result['today_listens']);
+        }
+        
+        return 0;
     }
 }

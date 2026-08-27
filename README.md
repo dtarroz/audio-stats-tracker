@@ -7,8 +7,10 @@ Application web PHP pour suivre l'évolution du nombre d'écoutes de ces musique
 - 📊 Historique complet des écoutes
 - 📈 Graphiques d'évolution interactifs (Chart.js)
 - 🏆 Top 5 des musiques les plus écoutées
-- 📊 Top 5 des progressions (7/30/90 jours)
+- 📈 Top 5 des progressions (15 jours)
 - 🔍 Recherche et tri des musiques
+- ✅ Filtre des écoutes du jour
+- 📊 Suivi des écoutes quotidiennes
 - 📱 Interface responsive (ordinateur, tablette, mobile)
 - 🗄️ Base de données SQLite
 - 🔄 Système de migrations automatique
@@ -222,6 +224,7 @@ Utilisez l'un des moyens ci-dessus (API, bookmarklet) pour effectuer votre premi
 ### Recherche et tri
 
 - **Recherche** : Saisissez un mot-clé dans la barre de recherche
+- **Filtre écoutes du jour** : Cochez la case pour n'afficher que les musiques ayant eu des écoutes lors de la dernière journée
 - **Tri disponible** :
   - Ordre Audio.com (récent en premier)
   - Titre A → Z / Z → A
@@ -233,14 +236,19 @@ Utilisez l'un des moyens ci-dessus (API, bookmarklet) pour effectuer votre premi
 Le tableau de bord affiche côte à côte :
 
 1. **Top 5 des écoutes** : Les 5 musiques avec le plus d'écoutes actuelles
-2. **Top 5 des progressions** : Les 5 musiques avec la plus forte progression
-   - Filtrable par période : 7, 30 ou 90 jours
-   - Affiche le pourcentage de progression
+2. **Top 5 des progressions (15 jours)** : Les 5 musiques avec la plus forte progression sur les 15 derniers jours
+   - Affiche le nombre d'écoutes gagnées (+X)
+
+### Écoutes du jour
+
+- La statistique "**Écoutes du jour**" affiche le nombre total d'écoutes gagnées depuis la dernière synchronisation
+- Calculé en faisant la différence entre les valeurs de la dernière et l'avant-dernière capture
+- Permet de suivre l'activité récente de vos musiques
 
 ### Graphiques
 
 - Chaque musique possède son propre graphique d'évolution
-- Filtres de période : 7, 15, 30, 60, 90 jours ou tout l'historique
+- Filtres de période : 7, **15 (par défaut)**, 30, 60, 90 jours ou tout l'historique
 - Survol pour voir les détails (date et nombre d'écoutes)
 - Les graphiques sont générés à la demande pour optimiser les performances
 
@@ -349,6 +357,40 @@ En cas de problème :
 - **Audio.com** : Source des données
 
 ## 📋 Changelog
+
+### Version 1.2.0 (2026-08-22)
+
+**Nouvelles fonctionnalités :**
+- ✅ Ajout d'un filtre "**Écoutes du jour uniquement**" dans la zone de recherche
+  - Permet de filtrer les musiques qui ont eu des écoutes entre la dernière et l'avant-dernière journée de synchronisation
+  - Case à cocher facilement accessible pour un filtrage rapide
+
+**Améliorations :**
+- 📊 La carte "Supprimées" a été remplacée par "**Écoutes du jour**"
+  - Affiche désormais le nombre total d'écoutes gagnées sur la dernière journée
+  - Calcul basé sur la différence entre la dernière journée de sync et la journée précédente
+- 📈 Le Top 5 des progressions est maintenant **fixé à 15 jours**
+  - Suppression des onglets 7/30/90 jours pour simplifier l'interface
+  - Le titre indique clairement "Top 5 des progressions (15 jours)"
+- 📊 Les graphiques des musiques affichent par défaut **15 jours** au lieu de 30
+  - Période plus pertinente pour suivre les tendances récentes
+  - Les autres périodes (7, 30, 60, 90 jours, tout) restent disponibles
+
+**Corrections de bugs :**
+- 🐛 Correction du calcul des "Écoutes du jour"
+  - Compare maintenant la dernière **journée** de synchronisation avec la **journée précédente**
+  - Auparavant comparait la toute dernière sync avec l'avant-dernière sync (même jour)
+  - Résultat : affichage correct du nombre d'écoutes quotidiennes
+- 🐛 Correction du filtre "Écoutes du jour uniquement"
+  - Utilise la même logique que la carte (comparaison jour par jour)
+  - Affiche maintenant toutes les musiques avec des écoutes sur la journée
+- 🐛 Correction de la cohérence entre progression et graphiques
+  - La progression affichée dans les cards correspond désormais exactement aux données du graphique
+  - Utilise les **N derniers jours de synchronisation** au lieu d'une période calendaire
+  - Garantit que la valeur de départ de la progression = première valeur visible sur le graphique
+- 🐛 Correction de la checkbox Firefox
+  - La case "Écoutes du jour uniquement" se décoche automatiquement au rechargement (F5)
+  - Fix pour Firefox qui conservait l'état coché sans appliquer le filtre
 
 ### Version 1.1.0 (Août 2026)
 

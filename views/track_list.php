@@ -11,6 +11,13 @@
                    class="form-control">
         </div>
         
+        <div class="filter-box">
+            <label>
+                <input type="checkbox" id="filterTodayListens">
+                Écoutes du jour uniquement
+            </label>
+        </div>
+        
         <div class="sort-box">
             <label for="sortSelect">Trier par :</label>
             <select id="sortSelect" class="form-control">
@@ -56,8 +63,8 @@
             <div class="chart-controls">
                 <select class="chart-period-select form-control-sm">
                     <option value="7">7 jours</option>
-                    <option value="15">15 jours</option>
-                    <option value="30" selected>30 jours</option>
+                    <option value="15" selected>15 jours</option>
+                    <option value="30">30 jours</option>
                     <option value="60">60 jours</option>
                     <option value="90">90 jours</option>
                     <option value="0">Tout</option>

@@ -107,18 +107,50 @@ class TrackRepository {
     
     /**
      * Récupère toutes les musiques avec filtres et tri
-     * @param array $filters Filtres (search, orderBy)
+     * @param array $filters Filtres (search, orderBy, filterTodayListens)
      * @return array
      */
     public function findAll($filters = array()) {
         $where = array();
         $params = array();
         $orderBy = "t.audio_id DESC"; // Par défaut: ordre Audio.com (plus récentes en premier)
+        $additionalJoins = "";
         
         // Filtre de recherche
         if (!empty($filters['search'])) {
             $where[] = "t.title LIKE ?";
             $params[] = '%' . $filters['search'] . '%';
+        }
+        
+        // Filtre des écoutes du jour
+        if (!empty($filters['filterTodayListens'])) {
+            // Comparer la dernière journée de sync avec la journée précédente
+            $additionalJoins .= "
+                INNER JOIN (
+                    SELECT 
+                        t_sub.id as track_id
+                    FROM tracks t_sub
+                    LEFT JOIN (
+                        SELECT track_id, listen_count
+                        FROM track_history
+                        WHERE DATE(captured_at) = (
+                            SELECT DATE(MAX(captured_at)) FROM track_history
+                        )
+                        GROUP BY track_id
+                        HAVING captured_at = MAX(captured_at)
+                    ) today ON t_sub.id = today.track_id
+                    LEFT JOIN (
+                        SELECT track_id, listen_count
+                        FROM track_history
+                        WHERE DATE(captured_at) = (
+                            SELECT DATE(MAX(captured_at), '-1 day') FROM track_history
+                        )
+                        GROUP BY track_id
+                        HAVING captured_at = MAX(captured_at)
+                    ) yesterday ON t_sub.id = yesterday.track_id
+                    WHERE today.listen_count > COALESCE(yesterday.listen_count, 0)
+                ) today_listens ON t.id = today_listens.track_id
+            ";
         }
         
         // Ordre de tri
@@ -152,6 +184,7 @@ class TrackRepository {
                     ORDER BY captured_at DESC 
                     LIMIT 1), 0) as current_listen_count
             FROM tracks t
+            {$additionalJoins}
             {$whereClause}
             ORDER BY {$orderBy}
         ";

@@ -20,11 +20,11 @@
             </div>
         </div>
         
-        <div class="stat-card stat-danger">
-            <div class="stat-icon">✗</div>
+        <div class="stat-card stat-warning">
+            <div class="stat-icon">📊</div>
             <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['deleted_tracks']; ?></div>
-                <div class="stat-label">Supprimées</div>
+                <div class="stat-value"><?php echo number_format($stats['today_listens'], 0, ',', ' '); ?></div>
+                <div class="stat-label">Écoutes du jour</div>
             </div>
         </div>
         
@@ -96,13 +96,7 @@
         
         <!-- Top des progressions -->
         <div class="top-section">
-            <h3>Top 5 des progressions</h3>
-            
-            <div class="tabs">
-                <button class="tab-btn" data-days="7">7 jours</button>
-                <button class="tab-btn active" data-days="30">30 jours</button>
-                <button class="tab-btn" data-days="90">90 jours</button>
-            </div>
+            <h3>Top 5 des progressions (15 jours)</h3>
             
             <div id="topProgressionsList" class="progression-list">
                 <!-- Chargé dynamiquement par JavaScript -->

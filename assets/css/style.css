@@ -488,6 +488,7 @@ main {
 }
 
 .track-status.available {
+    display: none; /* Masquer le statut "Disponible" pour plus de clarté */
     background: #d1fae5;
     color: #065f46;
 }

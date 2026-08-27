@@ -23,31 +23,31 @@ try {
     // Récupérer les paramètres
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $orderBy = isset($_GET['orderBy']) ? $_GET['orderBy'] : 'default';
-    $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+    $days = isset($_GET['days']) ? (int)$_GET['days'] : 15;
+    $filterTodayListens = isset($_GET['filterTodayListens']) && $_GET['filterTodayListens'] === '1';
     
     // Récupérer les musiques
     $tracks = $trackRepository->findAll(array(
         'search' => $search,
-        'orderBy' => $orderBy
+        'orderBy' => $orderBy,
+        'filterTodayListens' => $filterTodayListens
     ));
     
-    // Enrichir avec les progressions si nécessaire
-    if ($orderBy === 'progression' || $days > 0) {
-        foreach ($tracks as &$track) {
-            $progression = $statistics->calculateProgression($track->id, $days);
-            $track->progression = $progression['progression'];
-            $track->firstValue = $progression['first_value'];
-        }
-        unset($track); // Important: libérer la référence pour éviter les problèmes
-        
-        // Trier par progression si demandé
-        if ($orderBy === 'progression') {
-            usort($tracks, function($a, $b) {
-                if ($a->progression === null) return 1;
-                if ($b->progression === null) return -1;
-                return $b->progression - $a->progression;
-            });
-        }
+    // Enrichir avec les progressions (toujours calculer pour l'affichage dans les cards)
+    foreach ($tracks as &$track) {
+        $progression = $statistics->calculateProgression($track->id, $days);
+        $track->progression = $progression['progression'];
+        $track->firstValue = $progression['first_value'];
+    }
+    unset($track); // Important: libérer la référence pour éviter les problèmes
+    
+    // Trier par progression si demandé
+    if ($orderBy === 'progression') {
+        usort($tracks, function($a, $b) {
+            if ($a->progression === null) return 1;
+            if ($b->progression === null) return -1;
+            return $b->progression - $a->progression;
+        });
     }
     
     // Convertir en tableau pour JSON
