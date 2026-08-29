@@ -256,9 +256,10 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
         // Le JSON est échappé avec des backslashes : \"id\":\"123\", \"playsCount\":456
         // Le playsCount se trouve ~3000-4000 caractères après l'ID (après le champ source)
         
-        // Pattern : chercher "id":"XXXXXXXXX" suivi de "playsCount":YYY dans les 5000 premiers caractères
-        // On vérifie aussi que c'est bien un objet audio de dtarroz
-        if (preg_match_all('/\\\\"id\\\\":\\\\"(\d+)\\\\".{50,5000}?\\\\"authorUsername\\\\":\\\\"dtarroz\\\\".{50,5000}?\\\\"playsCount\\\\":(\d+)/', $html, $matches, PREG_SET_ORDER)) {
+        // Pattern : chercher "id":"XXXXXXXXX","authorId" (pour s'assurer que c'est un audio)
+        // puis "authorUsername":"dtarroz" et enfin "playsCount":YYY
+        // Le champ authorId juste après id garantit qu'on est sur un objet audio et non un objet analytics
+        if (preg_match_all('/\\\\"id\\\\":\\\\"(\d+)\\\\",\\\\"authorId\\\\":\\\\"\\d+\\\\".{0,6000}?\\\\"authorUsername\\\\":\\\\"dtarroz\\\\".{0,6000}?\\\\"playsCount\\\\":(\d+)/', $html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $audioId = $match[1];
                 $playsCount = intval($match[2]);
