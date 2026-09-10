@@ -4,19 +4,11 @@
     
     <!-- Statistiques globales -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">🎵</div>
+        <div class="stat-card stat-info">
+            <div class="stat-icon">🎧</div>
             <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['total_tracks']; ?></div>
-                <div class="stat-label">Musiques au total</div>
-            </div>
-        </div>
-        
-        <div class="stat-card stat-success">
-            <div class="stat-icon">✓</div>
-            <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['available_tracks']; ?></div>
-                <div class="stat-label">Disponibles</div>
+                <div class="stat-value"><?php echo number_format($stats['total_listen_count'], 0, ',', ' '); ?></div>
+                <div class="stat-label">Écoutes totales</div>
             </div>
         </div>
         
@@ -27,12 +19,12 @@
                 <div class="stat-label">Écoutes du jour</div>
             </div>
         </div>
-        
-        <div class="stat-card stat-info">
-            <div class="stat-icon">🎧</div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🎵</div>
             <div class="stat-content">
-                <div class="stat-value"><?php echo number_format($stats['total_listen_count'], 0, ',', ' '); ?></div>
-                <div class="stat-label">Écoutes totales</div>
+                <div class="stat-value"><?php echo $stats['total_tracks']; ?></div>
+                <div class="stat-label">Musiques au total</div>
             </div>
         </div>
     </div>
