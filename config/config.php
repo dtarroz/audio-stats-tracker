@@ -36,6 +36,7 @@ define('TRACKS_PER_PAGE', 50);
 // Gestion des erreurs
 define('DISPLAY_ERRORS', false);
 define('LOG_ERRORS', true);
+define('ENABLE_APPLICATION_LOGS', false);
 
 // Configuration PHP
 if (DISPLAY_ERRORS) {

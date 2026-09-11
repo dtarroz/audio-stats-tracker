@@ -12,7 +12,7 @@ class Logger {
      * @param string $level Niveau de log (INFO, WARNING, ERROR)
      */
     private static function log($message, $level = 'INFO') {
-        if (!LOG_ERRORS && $level !== 'INFO') {
+        if ((!LOG_ERRORS && $level !== 'INFO') || !ENABLE_APPLICATION_LOGS) {
             return;
         }
         
