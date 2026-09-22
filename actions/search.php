@@ -36,8 +36,10 @@ try {
     // Enrichir avec les progressions (toujours calculer pour l'affichage dans les cards)
     foreach ($tracks as &$track) {
         $progression = $statistics->calculateProgression($track->id, $days);
+        $dailyProgression = $statistics->calculateDailyProgression($track->id);
         $track->progression = $progression['progression'];
         $track->firstValue = $progression['first_value'];
+        $track->dailyProgression = $dailyProgression['progression'];
     }
     unset($track); // Important: libérer la référence pour éviter les problèmes
     
@@ -67,6 +69,10 @@ try {
         
         if (isset($track->progression)) {
             $trackArray['progression'] = $track->progression;
+        }
+
+        if (isset($track->dailyProgression)) {
+            $trackArray['daily_progression'] = $track->dailyProgression;
         }
         
         $result[] = $trackArray;

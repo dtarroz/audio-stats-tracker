@@ -303,7 +303,23 @@ function displayTracks(tracks) {
         var progressionSpan = clone.querySelector('.track-progression');
         if (track.progression !== null && track.progression !== undefined) {
             var progression = parseInt(track.progression);
-            progressionSpan.textContent = '+' + progression;
+            var dailyProgression = track.daily_progression !== null && track.daily_progression !== undefined
+                ? parseInt(track.daily_progression)
+                : null;
+            var dailyProgressionHtml = '';
+
+            if (dailyProgression !== null && !isNaN(dailyProgression)) {
+                var dailyProgressionSign = dailyProgression > 0 ? '+' : '';
+                var dailyProgressionClass = 'track-daily-progression';
+
+                if (dailyProgression > 0) {
+                    dailyProgressionClass += ' positive';
+                }
+
+                dailyProgressionHtml = ' <span class="' + dailyProgressionClass + '" title="Progression du jour par rapport à hier">(' + dailyProgressionSign + dailyProgression + ')</span>';
+            }
+
+            progressionSpan.innerHTML = '+' + progression + dailyProgressionHtml;
             if (progression > 0) {
                 progressionSpan.classList.add('positive');
             }

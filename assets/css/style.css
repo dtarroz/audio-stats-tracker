@@ -533,6 +533,17 @@ main {
     color: #ef4444;
 }
 
+.track-daily-progression {
+    font-size: 0.72em;
+    font-weight: 600;
+    color: #f59e0b;
+    white-space: nowrap;
+}
+
+.track-daily-progression.positive {
+    color: #0f766e;
+}
+
 /* Chart */
 .track-chart-container {
     padding: 15px;

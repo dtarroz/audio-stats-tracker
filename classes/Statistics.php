@@ -120,6 +120,45 @@ class Statistics {
             'progression' => $progression
         );
     }
+
+    /**
+     * Calcule la progression du jour par rapport à la veille
+     * @param int $trackId ID de la musique
+     * @return array Tableau avec first_value, current_value, progression
+     */
+    public function calculateDailyProgression($trackId) {
+        $query = "
+            SELECT 
+                MAX(listen_count) as listen_count
+            FROM track_history
+            WHERE track_id = ?
+            GROUP BY DATE(captured_at)
+            ORDER BY DATE(captured_at) DESC
+            LIMIT 2
+        ";
+
+        $results = $this->db->query($query, array($trackId));
+
+        if (count($results) < 2) {
+            return array(
+                'first_value' => 0,
+                'current_value' => 0,
+                'progression' => null
+            );
+        }
+
+        $currentResult = array('listen_count' => $results[0]['listen_count']);
+        $firstResult = array('listen_count' => $results[1]['listen_count']);
+
+        $firstValue = (int)$firstResult['listen_count'];
+        $currentValue = (int)$currentResult['listen_count'];
+
+        return array(
+            'first_value' => $firstValue,
+            'current_value' => $currentValue,
+            'progression' => $currentValue - $firstValue
+        );
+    }
     
     /**
      * Récupère le top des progressions
