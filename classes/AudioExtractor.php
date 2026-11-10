@@ -117,10 +117,10 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
         
         Logger::info("parseTracksFromHtml - Début");
         
-        // Étape 1 : Extraire les playsCount depuis le JSON échappé
-        Logger::info("parseTracksFromHtml - Étape 1: Extraction playsCount");
-        $playsCounts = $this->extractPlaysCountFromJson($html);
-        Logger::info("parseTracksFromHtml - playsCount extraits: " . count($playsCounts));
+        // Étape 1 : Extraire les playsCount et likesCount depuis le JSON échappé
+        Logger::info("parseTracksFromHtml - Étape 1: Extraction playsCount et likesCount");
+        $counts = $this->extractCountFromJson($html);
+        Logger::info("parseTracksFromHtml - counts extraits: " . count($counts));
         
         // Étape 2 : Parser le HTML visible pour extraire les musiques
         Logger::info("parseTracksFromHtml - Étape 2: Création DOMDocument");
@@ -208,8 +208,11 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
                     $trackUrl = AUDIO_BASE_URL . 'dtarroz/' . $slug;
                 }
                 
-                // Récupérer le nombre d'écoutes depuis le tableau extrait
-                $listenCount = isset($playsCounts[$audioId]) ? $playsCounts[$audioId] : 0;
+                // Récupérer le nombre d'écoutes et de likes depuis le tableau extrait
+                $listenCount = isset($counts[$audioId]) ? $counts[$audioId]['plays_count'] : 0;
+                $likesCount = isset($counts[$audioId]) ? $counts[$audioId]['likes_count'] : 0;
+                
+                Logger::info("Likes lus pour '{$title}' (ID: {$audioId}): {$likesCount} likes, {$listenCount} écoutes");
                 
                 // Vérifier que nous avons au moins un ID et un titre, et qu'on n'a pas déjà traité cet ID
                 if (!empty($audioId) && !empty($title)) {
@@ -224,12 +227,13 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
                         'track_url' => $trackUrl,
                         'title' => $title,
                         'image_url' => $imageUrl,
-                        'listen_count' => $listenCount
+                        'listen_count' => $listenCount,
+                        'likes_count' => $likesCount
                     );
-                    
+
                     $processedIds[] = $audioId;
-                    
-                    Logger::info("Musique extraite: {$title} (ID: {$audioId}, Plays: {$listenCount})");
+
+                    Logger::info("Musique extraite: {$title} (ID: {$audioId}, Plays: {$listenCount}, Likes: {$likesCount})");
                 } else {
                     Logger::warning("Musique ignorée: titre ou ID manquant (ID: {$audioId}, Titre: {$title})");
                 }
@@ -245,33 +249,38 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
     }
     
     /**
-     * Extrait les playsCount depuis le JSON échappé dans le HTML
-     * Format : \"id\":\"XXXXXXXXX\",…,\"playsCount\":YYY
+     * Extrait les playsCount et likesCount depuis le JSON échappé dans le HTML
+     * Format : \"id\":\"XXXXXXXXX\",…,\"playsCount\":YYY,…,\"likesCount\":ZZZ
      * @param string $html Contenu HTML
-     * @return array Tableau associatif [audio_id => plays_count]
+     * @return array Tableau associatif [audio_id => ['plays_count' => X, 'likes_count' => Y]]
      */
-    private function extractPlaysCountFromJson($html) {
-        $playsCounts = array();
-        
-        // Le JSON est échappé avec des backslashes : \"id\":\"123\", \"playsCount\":456
+    private function extractCountFromJson($html) {
+        $counts = array();
+
+        // Le JSON est échappé avec des backslashes : \"id\":\"123\", \"playsCount\":456, \"likesCount\":789
         // Le playsCount se trouve ~3000-4000 caractères après l'ID (après le champ source)
-        
+        // Le likesCount se trouve dans le même bloc JSON
+
         // Pattern : chercher "id":"XXXXXXXXX","authorId" (pour s'assurer que c'est un audio)
-        // puis "authorUsername":"dtarroz" et enfin "playsCount":YYY
+        // puis "authorUsername":"dtarroz" et enfin "playsCount":YYY et "likesCount":ZZZ
         // Le champ authorId juste après id garantit qu'on est sur un objet audio et non un objet analytics
-        if (preg_match_all('/\\\\"id\\\\":\\\\"(\d+)\\\\",\\\\"authorId\\\\":\\\\"\\d+\\\\".{0,6000}?\\\\"authorUsername\\\\":\\\\"dtarroz\\\\".{0,6000}?\\\\"playsCount\\\\":(\d+)/', $html, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('/\x5c"(\d+)\x5c",\x5c"authorId\x5c"\s*:\s*\x5c"\d+\x5c".{0,6000}?\x5c"authorUsername\x5c"\s*:\s*\x5c"dtarroz\x5c".{0,6000}?\x5c"playsCount\x5c"\s*:\s*(\d+).{0,3000}?\x5c"likesCount\x5c"\s*:\s*(\d+)/si', $html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $audioId = $match[1];
                 $playsCount = intval($match[2]);
-                
-                // Ne garder que le premier playsCount trouvé pour chaque ID (éviter les doublons)
-                if (!isset($playsCounts[$audioId])) {
-                    $playsCounts[$audioId] = $playsCount;
+                $likesCount = intval($match[3]);
+
+                // Ne garder que le premier count trouvé pour chaque ID (éviter les doublons)
+                if (!isset($counts[$audioId])) {
+                    $counts[$audioId] = array(
+                        'plays_count' => $playsCount,
+                        'likes_count' => $likesCount
+                    );
                 }
             }
         }
-        
-        return $playsCounts;
+
+        return $counts;
     }
     
     /**

@@ -141,9 +141,11 @@ try {
                 Logger::info("Nouvelle musique: {$trackData['title']} (ID: {$trackData['audio_id']})");
             }
             
-            // Ajouter l'historique du nombre d'écoutes (même si 0)
+            // Ajouter l'historique du nombre d'écoutes et de likes (même si 0)
             $listenCount = isset($trackData['listen_count']) ? $trackData['listen_count'] : 0;
-            $trackRepository->addHistory($trackId, $listenCount);
+            $likesCount = isset($trackData['likes_count']) ? $trackData['likes_count'] : 0;
+            $trackRepository->addHistory($trackId, $listenCount, $likesCount);
+            Logger::info("Historique ajouté: {$trackData['title']} - {$listenCount} écoutes, {$likesCount} likes");
         } catch (Exception $e) {
             Logger::error("Erreur lors du traitement de la musique {$trackData['title']}: " . $e->getMessage());
             Logger::error("Stack trace: " . $e->getTraceAsString());

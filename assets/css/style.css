@@ -470,13 +470,29 @@ main {
 }
 
 .track-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .track-title {
     font-size: 1.2em;
-    margin-bottom: 8px;
+    margin: 0;
     color: #333;
+}
+
+.track-likes {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    color: #666;
+    background: #f3f4f6;
+    padding: 3px 10px;
+    border-radius: 12px;
 }
 
 .track-status {

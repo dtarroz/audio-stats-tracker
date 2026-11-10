@@ -50,6 +50,11 @@ class Track {
      * @var int Nombre d'écoutes actuel
      */
     public $currentListenCount;
+
+    /**
+     * @var int Nombre de likes actuel
+     */
+    public $currentLikesCount;
     
     /**
      * Constructeur à partir d'un tableau de données
@@ -66,6 +71,7 @@ class Track {
             $this->createdAt = isset($data['created_at']) ? $data['created_at'] : '';
             $this->updatedAt = isset($data['updated_at']) ? $data['updated_at'] : '';
             $this->currentListenCount = isset($data['current_listen_count']) ? (int)$data['current_listen_count'] : 0;
+            $this->currentLikesCount = isset($data['current_likes_count']) ? (int)$data['current_likes_count'] : 0;
         }
     }
     

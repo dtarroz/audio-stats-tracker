@@ -102,21 +102,23 @@ try {
             if ($existingTrack) {
                 // Mettre à jour la piste existante
                 $trackRepository->update($existingTrack->id, $trackData);
-                
+
                 // Ajouter l'historique
-                $trackRepository->addHistory($existingTrack->id, $trackData['listen_count']);
-                
+                $likesCount = isset($trackData['likes_count']) ? $trackData['likes_count'] : 0;
+                $trackRepository->addHistory($existingTrack->id, $trackData['listen_count'], $likesCount);
+
                 $tracksUpdated++;
-                Logger::info("Piste mise à jour: {$trackData['title']} (ID: {$trackData['audio_id']})");
+                Logger::info("Piste mise à jour: {$trackData['title']} (ID: {$trackData['audio_id']}) - {$likesCount} likes stockés");
             } else {
                 // Créer une nouvelle piste
                 $newTrackId = $trackRepository->create($trackData);
-                
+
                 // Ajouter l'historique initial
-                $trackRepository->addHistory($newTrackId, $trackData['listen_count']);
-                
+                $likesCount = isset($trackData['likes_count']) ? $trackData['likes_count'] : 0;
+                $trackRepository->addHistory($newTrackId, $trackData['listen_count'], $likesCount);
+
                 $tracksAdded++;
-                Logger::info("Nouvelle piste créée: {$trackData['title']} (ID: {$trackData['audio_id']})");
+                Logger::info("Nouvelle piste créée: {$trackData['title']} (ID: {$trackData['audio_id']}) - {$likesCount} likes stockés");
             }
             
         } catch (Exception $e) {

@@ -298,6 +298,16 @@ function displayTracks(tracks) {
         // Nombre d'écoutes
         var listensSpan = clone.querySelector('.track-listens');
         listensSpan.textContent = formatNumber(track.current_listen_count);
+
+        // Nombre de likes (affiché uniquement si > 0)
+        var likesSpan = clone.querySelector('.track-likes');
+        var likesCount = track.current_likes_count || 0;
+        if (likesCount > 0) {
+            likesSpan.style.display = 'inline-flex';
+            likesSpan.querySelector('.likes-count').textContent = formatNumber(likesCount);
+        } else {
+            likesSpan.style.display = 'none';
+        }
         
         // Progression
         var progressionSpan = clone.querySelector('.track-progression');

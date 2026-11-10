@@ -85,7 +85,9 @@ try {
         }
         
         // Ajouter dans l'historique
-        $trackRepository->addHistory($trackId, $trackData['listen_count']);
+        $likesCount = isset($trackData['likes_count']) ? $trackData['likes_count'] : 0;
+        $trackRepository->addHistory($trackId, $trackData['listen_count'], $likesCount);
+        Logger::info("Historique ajouté: {$trackData['title']} - {$trackData['listen_count']} écoutes, {$likesCount} likes");
         
         // Envoyer la progression tous les 10 enregistrements
         if ($processed % 10 == 0 || $processed == $totalTracks) {

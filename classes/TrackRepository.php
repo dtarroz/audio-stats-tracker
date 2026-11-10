@@ -31,7 +31,12 @@ class TrackRepository {
                     FROM track_history 
                     WHERE track_id = t.id 
                     ORDER BY captured_at DESC 
-                    LIMIT 1), 0) as current_listen_count
+                    LIMIT 1), 0) as current_listen_count,
+                   COALESCE((SELECT likes_count 
+                    FROM track_history 
+                    WHERE track_id = t.id 
+                    ORDER BY captured_at DESC 
+                    LIMIT 1), 0) as current_likes_count
             FROM tracks t
             WHERE audio_id = ?
         ";
@@ -182,7 +187,12 @@ class TrackRepository {
                     FROM track_history 
                     WHERE track_id = t.id 
                     ORDER BY captured_at DESC 
-                    LIMIT 1), 0) as current_listen_count
+                    LIMIT 1), 0) as current_listen_count,
+                   COALESCE((SELECT likes_count 
+                    FROM track_history 
+                    WHERE track_id = t.id 
+                    ORDER BY captured_at DESC 
+                    LIMIT 1), 0) as current_likes_count
             FROM tracks t
             {$additionalJoins}
             {$whereClause}
@@ -233,16 +243,18 @@ class TrackRepository {
      * Ajoute un enregistrement dans l'historique
      * @param int $trackId ID de la musique
      * @param int $listenCount Nombre d'écoutes
+     * @param int $likesCount Nombre de likes
      */
-    public function addHistory($trackId, $listenCount) {
+    public function addHistory($trackId, $listenCount, $likesCount = 0) {
         $query = "
-            INSERT INTO track_history (track_id, listen_count, captured_at)
-            VALUES (?, ?, ?)
+            INSERT INTO track_history (track_id, listen_count, likes_count, captured_at)
+            VALUES (?, ?, ?, ?)
         ";
-        
+
         $this->db->execute($query, array(
             $trackId,
             $listenCount,
+            $likesCount,
             date(DATE_FORMAT)
         ));
     }

@@ -63,6 +63,7 @@ try {
             'image_url' => $track->imageUrl,
             'available' => $track->available,
             'current_listen_count' => $track->currentListenCount,
+            'current_likes_count' => $track->currentLikesCount,
             'created_at' => $track->createdAt,
             'updated_at' => $track->updatedAt
         );

@@ -44,6 +44,7 @@
             <img src="" alt="" class="track-image">
             <div class="track-title-section">
                 <h3 class="track-title"></h3>
+                <span class="track-likes" style="display:none;">👍 <span class="likes-count">0</span></span>
                 <span class="track-status"></span>
             </div>
         </div>
