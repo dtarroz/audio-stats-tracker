@@ -8,7 +8,7 @@ var app = {
     currentPeriod: 15,
     currentSort: 'progression',
     currentSearch: '',
-    filterTodayListens: false,
+    filterTodayListens: true,
     tracks: [],
     charts: {}
 };
@@ -176,10 +176,10 @@ function initFilters() {
         sortSelect.value = app.currentSort;
     }
     
-    // Forcer la checkbox à décochée au chargement (fix Firefox)
+    // Forcer la checkbox à cochée au chargement (fix Firefox)
     if (filterTodayCheckbox) {
-        filterTodayCheckbox.checked = false;
-        app.filterTodayListens = false;
+        filterTodayCheckbox.checked = true;
+        app.filterTodayListens = true;
     }
     
     if (searchInput) {
