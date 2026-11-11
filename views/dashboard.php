@@ -1,10 +1,9 @@
 <!-- Dashboard / Tableau de bord -->
 <section class="dashboard">
-    <h2>Tableau de bord</h2>
     
     <!-- Statistiques globales -->
     <div class="stats-grid">
-        <div class="stat-card stat-info">
+        <div class="stat-card">
             <div class="stat-icon">🎧</div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo number_format($stats['total_listen_count'], 0, ',', ' '); ?></div>
@@ -12,7 +11,7 @@
             </div>
         </div>
 
-        <div class="stat-card stat-success">
+        <div class="stat-card">
             <div class="stat-icon">👍</div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo number_format($stats['total_likes_count'], 0, ',', ' '); ?></div>
@@ -20,7 +19,7 @@
             </div>
         </div>
         
-        <div class="stat-card stat-warning">
+        <div class="stat-card">
             <div class="stat-icon">📊</div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo number_format($stats['today_listens'], 0, ',', ' '); ?></div>

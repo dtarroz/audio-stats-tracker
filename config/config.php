@@ -28,7 +28,7 @@ define('DATE_FORMAT_DAY', 'Y-m-d');
 
 // Configuration de l'application
 define('APP_NAME', 'Audio Stats Tracker');
-define('APP_VERSION', '1.5.0');
+define('APP_VERSION', '1.5.2');
 
 // Pagination
 define('TRACKS_PER_PAGE', 50);

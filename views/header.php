@@ -11,7 +11,6 @@
     <header class="main-header">
         <div class="container">
             <h1><?php echo APP_NAME; ?></h1>
-            <p class="version">Version <?php echo APP_VERSION; ?></p>
         </div>
     </header>
     
