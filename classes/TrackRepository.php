@@ -329,6 +329,25 @@ class TrackRepository {
         $result = $this->db->queryOne($query);
         return $result ? (int)$result['total'] : 0;
     }
+    /**
+     * Calcule le nombre total de likes actuels de toutes les musiques
+     * @return int
+     */
+    public function getTotalLikesCount() {
+        $query = "
+            SELECT SUM(
+                COALESCE((SELECT likes_count 
+                    FROM track_history 
+                    WHERE track_id = t.id 
+                    ORDER BY captured_at DESC 
+                    LIMIT 1), 0)
+            ) as total
+            FROM tracks t
+        ";
+        $result = $this->db->queryOne($query);
+        return $result ? (int)$result['total'] : 0;
+    }
+
     
     /**
      * Récupère la musique la plus écoutée

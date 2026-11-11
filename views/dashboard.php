@@ -11,6 +11,14 @@
                 <div class="stat-label">Écoutes totales</div>
             </div>
         </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-icon">👍</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo number_format($stats['total_likes_count'], 0, ',', ' '); ?></div>
+                <div class="stat-label">Likes totaux</div>
+            </div>
+        </div>
         
         <div class="stat-card stat-warning">
             <div class="stat-icon">📊</div>

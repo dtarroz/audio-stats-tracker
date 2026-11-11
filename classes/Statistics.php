@@ -208,6 +208,7 @@ class Statistics {
             'available_tracks' => $this->trackRepository->countAvailable(),
             'today_listens' => $this->getTodayListens(),
             'total_listen_count' => $this->trackRepository->getTotalListenCount(),
+            'total_likes_count' => $this->trackRepository->getTotalLikesCount(),
             'last_sync' => $this->getLastSyncDate(),
             'most_listened' => $this->trackRepository->getMostListened(),
             'top_listened' => $this->trackRepository->getTopListened(5)
